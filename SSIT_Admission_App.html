@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSIT Admission Form – Sri Siddhartha Institute of Technology</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --navy: #0f1f3d;
+      --gold: #c8922a;
+      --cream: #fdf8f0;
+      --light: #f5f0e8;
+      --border: #d4c4a0;
+      --red: #c0392b;
+      --green: #1a7a4a;
+      --text: #1a1a2e;
+      --muted: #6b6050;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── WATERMARK ── */
+    main::after {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      background-image: url('ssahe.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .college-logo {
+      width: 64px;
+      height: 64px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .college-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .college-info h1 {
+      font-family: 'Playfair Display', serif;
+      color: #fff;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .college-info p {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-bar-container {
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      color: var(--muted);
+      background: #fff;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .step-dot.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .step-dot.done {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--navy);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 100px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* ── FORM PAGES ── */
+    .form-page {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .form-page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── FIELD GROUPS ── */
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .field-row.cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .field-row.cols-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .field-row.cols-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    label .req {
+      color: var(--red);
+      margin-left: 2px;
+    }
+
+    input,
+    select,
+    textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(15, 31, 61, 0.1);
+    }
+
+    input.error {
+      border-color: var(--red);
+    }
+
+    input.uppercase {
+      text-transform: uppercase;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .field-error {
+      font-size: 11px;
+      color: var(--red);
+      display: none;
+    }
+
+    input.error+.field-error {
+      display: block;
+    }
+
+    /* ── LETTER BOX PREVIEW ── */
+    .letter-box-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-top: 8px;
+    }
+
+    .letter-box-preview .lbox {
+      width: 22px;
+      height: 26px;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      background: var(--light);
+      text-transform: uppercase;
+    }
+
+    /* ── TABLES for Academic ── */
+    .marks-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .marks-table th {
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .marks-table td {
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+    }
+
+    .marks-table tr:nth-child(even) td {
+      background: var(--light);
+    }
+
+    .marks-table input {
+      border: none;
+      background: transparent;
+      padding: 4px;
+      font-size: 13px;
+    }
+
+    .marks-table input:focus {
+      background: #fff;
+      border-radius: 3px;
+    }
+
+    /* ── CHECKLIST ── */
+    .checklist {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .check-item:hover {
+      border-color: var(--navy);
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--navy);
+    }
+
+    .check-item label {
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    /* ── NAV BUTTONS ── */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1a3060;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15, 31, 61, 0.3);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--navy);
+      border: 2px solid var(--navy);
+    }
+
+    .btn-secondary:hover {
+      background: var(--light);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #fff;
+    }
+
+    .btn-gold:hover {
+      background: #b07a1a;
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .btn-green:hover {
+      background: #156040;
+    }
+
+    /* ── REVIEW CARD ── */
+    .review-section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .review-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .review-item {}
+
+    .review-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .review-value {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .review-value.boxes {
+      font-family: 'Courier Prime', monospace;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    .review-value.boxes span {
+      width: 20px;
+      height: 22px;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background: var(--light);
+      text-transform: uppercase;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--green);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ── INFO CARD ── */
+    .info-card {
+      background: #e8f0fe;
+      border-left: 4px solid var(--navy);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #1a2a5e;
+    }
+
+    .info-card strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+
+      header,
+      .progress-bar-container,
+      .nav-buttons,
+      .toast {
+        display: none !important;
+      }
+
+      main {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .form-page {
+        display: block !important;
+      }
+
+      .form-page:not(#page-print) {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+    }
+
+    /* ── PRINT PREVIEW ── */
+    #print-preview {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 20px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .print-row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .print-label {
+      font-size: 9px;
+      color: #555;
+      min-width: 80px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .print-boxes {
+      display: flex;
+      gap: 1px;
+    }
+
+    .print-box {
+      width: 18px;
+      height: 20px;
+      border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-family: 'Courier Prime', monospace;
+    }
+
+    @media (max-width: 600px) {
+
+      .field-row.cols-2,
+      .field-row.cols-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .checklist {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding: 16px 20px;
+      }
+
+      main {
+        padding: 24px 16px 80px;
+      }
+
+      .progress-bar-container {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="college-logo">
+      <img src="ssit.jpg" alt="SSIT Logo">
+    </div>
+    <div class="college-info">
+      <h1>Sri Siddhartha Institute of Technology, Tumakuru</h1>
+      <p>Approved by AICTE · Accredited by NBA · NAAC 'A' Grade · Application No: 2800</p>
+    </div>
+  </header>
+
+  <div class="progress-bar-container">
+    <div class="step-dots">
+      <div class="step-dot active" id="dot-1" onclick="goToPage(0)">1</div>
+      <div class="step-dot" id="dot-2" onclick="goToPage(1)">2</div>
+      <div class="step-dot" id="dot-3" onclick="goToPage(2)">3</div>
+      <div class="step-dot" id="dot-4" onclick="goToPage(3)">4</div>
+      <div class="step-dot" id="dot-5" onclick="goToPage(4)">5</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:20%"></div>
+    </div>
+    <div class="step-label" id="step-label">Step 1 of 5: Personal Information</div>
+  </div>
+
+  <main>
+
+    <!-- ═══════════════════════════════════
+     PAGE 1: PERSONAL INFORMATION
+═══════════════════════════════════ -->
+    <div class="form-page active" id="page-1">
+      <h2 class="section-title">Personal Information</h2>
+      <p class="section-subtitle">Enter your details exactly as they appear in your 10th Standard Marks Card and Aadhar
+        Card.</p>
+
+      <div class="field-row cols-2">
+        <div class="field-group">
+          <select id="branch" required>
+            <option value="">Select Branch</option>
+            <option>Artificial Intelligence and Machine Learning</option>
+            <option>Biomedical Engineering</option>
+            <option>Civil Engineering</option>
+            <option>Computer Science (Cyber Security)</option>
+            <option>Computer Science (Data Science)</option>
+            <option>Computer Science and Engineering</option>
+            <option>Electrical and Electronics Engineering</option>
+            <option>Electronics and Communication Engineering</option>
+            <option>Electronics and Telecommunication</option>
+            <option>Information Science and Engineering</option>
+            <option>Mechanical Engineering</option>
+            <option>Robotics and Artificial Intelligence</option>
+            <option>Others</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Semester</label>
+          <select id="semester">
+            <option value="1">1st Semester</option>
+            <option value="2">2nd Semester</option>
+            <option value="3">3rd Semester (Lateral Entry)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>Applied Under <span class="req">*</span></label>
+          <select id="appliedUnder" required>
+            <option value="">Select</option>
+            <option>CET</option>
+            <option>COMED-K</option>
+            <option>Management Quota</option>
+            <option>NRI Quota</option>
+            <option>Lateral Entry</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Rank</label>
+          <input type="text" id="rank" placeholder="e.g. 12345" maxlength="10">
+        </div>
+        <div class="field-group">
+          <label>Admission Date</label>
+          <input type="date" id="admissionDate">
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:20px">
+        <label>Candidate Name (as in 10th Std. Marks Card) <span class="req">*</span></label>
+        <input type="text" id="candidateName" class="uppercase" maxlength="30" placeholder="FULL NAME IN CAPITALS"
+          oninput="updateBoxes('candidateName','preview-name', 30)" required>
+        <div class="letter-box-preview" id="preview-name"></div>
+        <div class="field-hint">Each letter will be printed in its own box — max 30 characters</div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>Gender <span class="req">*</span></label>
+          <select id="gender" required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob" required>
+        </div>
+        <div class="field-group">
+          <label>Blood Group</label>
+          <select id="bloodGroup">
+            <option value="">Select</option>
+            <option>A+</option>
+            <option>A-</option>
+            <option>B+</option>
+            <option>B-</option>
+            <option>O+</option>
+            <option>O-</option>
+            <option>AB+</option>
+            <option>AB-</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>Mother Tongue</label>
+          <input type="text" id="motherTongue" placeholder="e.g. Kannada" maxlength="20">
+        </div>
+        <div class="field-group">
+          <label>Religion</label>
+          <select id="religion">
+            <option value="">Select</option>
+            <option>Hindu</option>
+            <option>Muslim</option>
+            <option>Christian</option>
+            <option>Jain</option>
+            <option>Buddhist</option>
+            <option>Sikh</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Nationality <span class="req">*</span></label>
+          <select id="nationality" required>
+            <option value="Indian">Indian</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>Category <span class="req">*</span></label>
+          <select id="category" required>
+            <option value="">Select</option>
+            <option>GM</option>
+            <option>SC</option>
+            <option>ST</option>
+            <option>OBC</option>
+            <option>2A</option>
+            <option>2B</option>
+            <option>3A</option>
+            <option>3B</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Caste</label>
+          <input type="text" id="caste" placeholder="Caste" maxlength="30">
+        </div>
+        <div class="field-group">
+          <label>OBC</label>
+          <select id="obc">
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>CET No.</label>
+          <input type="text" id="cetNo" maxlength="15" placeholder="CET Number">
+        </div>
+        <div class="field-group">
+          <label>Seat Claimed Category</label>
+          <input type="text" id="seatClaimed" maxlength="10" placeholder="e.g. GM">
+        </div>
+        <div class="field-group">
+          <label>Seat Allotted Category</label>
+          <input type="text" id="seatAllotted" maxlength="10" placeholder="e.g. OBC">
+        </div>
+      </div>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>Physically Handicapped</label>
+          <select id="physicallyHandicapped">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Economically Backward</label>
+          <select id="economicallyBackward">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Resident Type</label>
+          <select id="residentType">
+            <option value="">Select</option>
+            <option>Local</option>
+            <option>Non-Local</option>
+            <option>Hostelar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row cols-2">
+        <div class="field-group">
+          <label>Aadhar Number <span class="req">*</span></label>
+          <input type="text" id="aadharNo" maxlength="12" placeholder="12-digit Aadhar Number"
+            oninput="this.value=this.value.replace(/\D/g,'')" required>
+          <div class="field-hint">Enter 12 digits without spaces</div>
+        </div>
+        <div class="field-group">
+          <label>Fees Paid (₹)</label>
+          <input type="number" id="feesPaid" placeholder="Amount in ₹" min="0">
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <div></div>
+        <button class="btn btn-primary" onclick="nextPage(1)">Next: Contact Details →</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+     PAGE 2: CONTACT & FAMILY
+═══════════════════════════════════ -->
+    <div class="form-page" id="page-2">
+      <h2 class="section-title">Contact & Family Details</h2>
+      <p class="section-subtitle">Provide accurate contact information. Mobile numbers must be 10 digits.</p>
+
+      <div class="field-row cols-3">
+        <div class="field-group">
+          <label>State <span class="req">*</span></label>
+          <input type="text" id="state" class="uppercase" placeholder="e.g. KARNATAKA" maxlength="20" required>
+        </div>
+        <div class="field-group">
+          <label>District <span class="req">*</span></label>
+          <input type="text" id="district" class="uppercase" placeholder="e.g. TUMAKURU" maxlength="20" required>
+        </div>
+        <div class="field-group">
+          <label>Annual Income (₹)</label>
+          <input type="number" id="annualIncome" placeholder="Family Annual Income" min="0">
+        </div>
+      </div>
+
+      <div class="field-row cols-2">
+        <div class="field-group">
+          <label>Student Mobile No. <span class="req">*</span></label>
+          <input type="tel" id="studentMobile" maxlength="10" placeholder="10-digit mobile number"
+            oninput="this.value=this.value.replace(/\D/g,'')" required>
+        </div>
+        <div class="field-group">
+          <label>Student E-mail <span class="req">*</span></label>
+          <input type="email" id="studentEmail" placeholder="student@email.com" required>
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:20px">
+        <label>Father's Name <span class="req">*</span></label>
+        <input type="text" id="fatherName" class="uppercase" maxlength="30" placeholder="FATHER'S FULL NAME"
+          oninput="updateBoxes('fatherName','preview-father', 30)" required>
+        <div class="letter-box-preview" id="preview-father"></div>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field-group">
+          <label>Father's Occupation</label>
+          <input type="text" id="fatherOccupation" placeholder="Occupation" maxlength="25">
+        </div>
+        <div class="field-group">
+          <label>Father's Mobile</label>
+          <input type="tel" id="fatherMobile" maxlength="10" placeholder="10-digit mobile"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:20px; margin-top:16px">
+        <label>Mother's Name <span class="req">*</span></label>
+        <input type="text" id="motherName" class="uppercase" maxlength="30" placeholder="MOTHER'S FULL NAME"
+          oninput="updateBoxes('motherName','preview-mother', 30)" required>
+        <div class="letter-box-preview" id="preview-mother"></div>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field-group">
+          <label>Mother's Occupation</label>
+          <input type="text" id="motherOccupation" placeholder="Occupation" maxlength="25">
+        </div>
+        <div class="field-group">
+          <label>Mother's Mobile</label>
+          <input type="tel" id="motherMobile" maxlength="10" placeholder="10-digit mobile"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+
+      <div class="field-row cols-2" style="margin-top:16px">
+        <div class="field-group">
+          <label>Mailing Address <span class="req">*</span></label>
+          <textarea id="mailingAddress" rows="3" placeholder="Door No, Street, City" maxlength="150"
+            required></textarea>
+          <input type="text" id="mailingPin" placeholder="PIN Code" maxlength="6"
+            oninput="this.value=this.value.replace(/\D/g,'')" style="margin-top:8px">
+        </div>
+        <div class="field-group">
+          <label>Permanent Address <span class="req">*</span></label>
+          <textarea id="permanentAddress" rows="3" placeholder="Door No, Street, City" maxlength="150"
+            required></textarea>
+          <input type="text" id="permanentPin" placeholder="PIN Code" maxlength="6"
+            oninput="this.value=this.value.replace(/\D/g,'')" style="margin-top:8px">
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:16px">
+        <label>Candidate Name as in Aadhar <span class="req">*</span></label>
+        <input type="text" id="aadharName" class="uppercase" maxlength="30" placeholder="NAME AS IN AADHAR"
+          oninput="updateBoxes('aadharName','preview-aadhar', 30)" required>
+        <div class="letter-box-preview" id="preview-aadhar"></div>
+      </div>
+
+      <div class="field-group" style="margin-top:16px">
+        <label>Guardian Name & Address</label>
+        <textarea id="guardianInfo" rows="3" placeholder="Guardian full name and address" maxlength="150"></textarea>
+        <input type="tel" id="guardianMobile" maxlength="10" placeholder="Guardian Mobile Number"
+          oninput="this.value=this.value.replace(/\D/g,'')" style="margin-top:8px">
+        <input type="text" id="guardianPin" placeholder="Guardian PIN Code" maxlength="6"
+          oninput="this.value=this.value.replace(/\D/g,'')" style="margin-top:8px">
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="prevPage(2)">← Back</button>
+        <button class="btn btn-primary" onclick="nextPage(2)">Next: Academic Records →</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+     PAGE 3: ACADEMIC CAREER
+═══════════════════════════════════ -->
+    <div class="form-page" id="page-3">
+      <h2 class="section-title">Academic Career</h2>
+      <p class="section-subtitle">Enter marks and details for each examination passed. Leave blank if not applicable.
+      </p>
+
+      <h4 style="margin-bottom:12px; color:var(--navy);">10th Standard (SSLC)</h4>
+      <table class="marks-table">
+        <tr>
+          <th>School Name</th>
+          <th>Board/University</th>
+          <th>State</th>
+          <th>Register No.</th>
+          <th>Max Marks</th>
+          <th>Marks Obtained</th>
+          <th>%</th>
+          <th>Month & Year</th>
+        </tr>
+        <tr>
+          <td><input type="text" id="sslc_school" placeholder="School Name"></td>
+          <td><input type="text" id="sslc_board" placeholder="Board Name"></td>
+          <td><input type="text" id="sslc_state" placeholder="State"></td>
+          <td><input type="text" id="sslc_regNo" placeholder="Register No."></td>
+          <td><input type="number" id="sslc_maxMarks" placeholder="e.g. 625" oninput="calcPct('sslc')"></td>
+          <td><input type="number" id="sslc_marksObtained" placeholder="e.g. 560" oninput="calcPct('sslc')"></td>
+          <td><input type="text" id="sslc_pct" placeholder="%" readonly
+              style="background:#f5f0e8;font-weight:600;color:var(--navy)"></td>
+          <td><input type="month" id="sslc_passingDate"></td>
+        </tr>
+      </table>
+
+      <h4 style="margin-bottom:12px; color:var(--navy); margin-top:20px;">12th Standard (PUC / HSC)</h4>
+      <table class="marks-table">
+        <tr>
+          <th>College Name</th>
+          <th>Board/University</th>
+          <th>State</th>
+          <th>Register No.</th>
+          <th>Max Marks</th>
+          <th>Marks Obtained</th>
+          <th>%</th>
+          <th>Month & Year</th>
+        </tr>
+        <tr>
+          <td><input type="text" id="puc_school" placeholder="College Name"></td>
+          <td><input type="text" id="puc_board" placeholder="Board Name"></td>
+          <td><input type="text" id="puc_state" placeholder="State"></td>
+          <td><input type="text" id="puc_regNo" placeholder="Register No."></td>
+          <td><input type="number" id="puc_maxMarks" placeholder="e.g. 600" oninput="calcPct('puc')"></td>
+          <td><input type="number" id="puc_marksObtained" placeholder="e.g. 540" oninput="calcPct('puc')"></td>
+          <td><input type="text" id="puc_pct" placeholder="%" readonly
+              style="background:#f5f0e8;font-weight:600;color:var(--navy)"></td>
+          <td><input type="month" id="puc_passingDate"></td>
+        </tr>
+      </table>
+
+      <h4 style="margin-bottom:12px; color:var(--navy); margin-top:20px;">12th Std. Subject-wise Marks</h4>
+      <table class="marks-table" style="width:60%">
+        <tr>
+          <th>Subject</th>
+          <th>Max Marks</th>
+          <th>Marks Obtained</th>
+          <th>%</th>
+        </tr>
+        <tr>
+          <td>Mathematics</td>
+          <td><input type="number" id="math_max" oninput="calcSubPct('math')"></td>
+          <td><input type="number" id="math_obt" oninput="calcSubPct('math')"></td>
+          <td><input type="text" id="math_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr>
+          <td>Physics</td>
+          <td><input type="number" id="phy_max" oninput="calcSubPct('phy')"></td>
+          <td><input type="number" id="phy_obt" oninput="calcSubPct('phy')"></td>
+          <td><input type="text" id="phy_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr>
+          <td>Chemistry</td>
+          <td><input type="number" id="chem_max" oninput="calcSubPct('chem')"></td>
+          <td><input type="number" id="chem_obt" oninput="calcSubPct('chem')"></td>
+          <td><input type="text" id="chem_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr>
+          <td>Electronics</td>
+          <td><input type="number" id="elec_max" oninput="calcSubPct('elec')"></td>
+          <td><input type="number" id="elec_obt" oninput="calcSubPct('elec')"></td>
+          <td><input type="text" id="elec_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr>
+          <td>Computer Science</td>
+          <td><input type="number" id="cs_max" oninput="calcSubPct('cs')"></td>
+          <td><input type="number" id="cs_obt" oninput="calcSubPct('cs')"></td>
+          <td><input type="text" id="cs_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr>
+          <td>Biology / Bio-Technology</td>
+          <td><input type="number" id="bio_max" oninput="calcSubPct('bio')"></td>
+          <td><input type="number" id="bio_obt" oninput="calcSubPct('bio')"></td>
+          <td><input type="text" id="bio_pct" readonly style="background:#f5f0e8;font-weight:600"></td>
+        </tr>
+        <tr style="background:var(--light);font-weight:600">
+          <td><strong>Total</strong></td>
+          <td><input type="text" id="total_max" readonly style="background:transparent;font-weight:700"></td>
+          <td><input type="text" id="total_obt" readonly style="background:transparent;font-weight:700"></td>
+          <td><input type="text" id="total_pct" readonly
+              style="background:transparent;font-weight:700;color:var(--navy)"></td>
+        </tr>
+      </table>
+
+      <h4 style="margin-bottom:12px; color:var(--navy); margin-top:20px;">Diploma / B.Sc / Other Qualifying Exam (if
+        applicable)</h4>
+      <table class="marks-table">
+        <tr>
+          <th>College Name</th>
+          <th>Board/University</th>
+          <th>State</th>
+          <th>Register No.</th>
+          <th>Max Marks</th>
+          <th>Marks Obtained</th>
+          <th>%</th>
+          <th>Month & Year</th>
+        </tr>
+        <tr>
+          <td><input type="text" id="dip_school" placeholder="College Name"></td>
+          <td><input type="text" id="dip_board" placeholder="University/Board"></td>
+          <td><input type="text" id="dip_state" placeholder="State"></td>
+          <td><input type="text" id="dip_regNo" placeholder="Register No."></td>
+          <td><input type="number" id="dip_maxMarks" oninput="calcPct('dip')"></td>
+          <td><input type="number" id="dip_marksObtained" oninput="calcPct('dip')"></td>
+          <td><input type="text" id="dip_pct" readonly style="background:#f5f0e8;font-weight:600;color:var(--navy)">
+          </td>
+          <td><input type="month" id="dip_passingDate"></td>
+        </tr>
+      </table>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="prevPage(3)">← Back</button>
+        <button class="btn btn-primary" onclick="nextPage(3)">Next: Documents Checklist →</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+     PAGE 4: DOCUMENTS CHECKLIST
+═══════════════════════════════════ -->
+    <div class="form-page" id="page-4">
+      <h2 class="section-title">Documents Checklist</h2>
+      <p class="section-subtitle">Select all documents you are submitting with this application.</p>
+
+      <div class="info-card">
+        <strong>📋 Important</strong>
+        Please ensure all original documents are physically submitted to the admissions office along with this printed
+        form.
+      </div>
+
+      <div class="checklist">
+        <label class="check-item">
+          <input type="checkbox" id="doc1"> <label for="doc1">Marks card of Qualifying Examinations</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc2"> <label for="doc2">SSLC Marks Card</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc3"> <label for="doc3">Transfer Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc4"> <label for="doc4">Migration Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc5"> <label for="doc5">Character Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc6"> <label for="doc6">Caste Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc7"> <label for="doc7">Study Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc8"> <label for="doc8">Medical Fitness Certificate</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc9"> <label for="doc9">CET Admission Order</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc10"> <label for="doc10">Recent Photographs</label>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="doc11"> <label for="doc11">Eligibility Certificate (Other State / Foreign
+            Students)</label>
+        </label>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="prevPage(4)">← Back</button>
+        <button class="btn btn-primary" onclick="nextPage(4)">Next: Review & Submit →</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+     PAGE 5: REVIEW & SUBMIT
+═══════════════════════════════════ -->
+    <div class="form-page" id="page-5">
+      <h2 class="section-title">Review & Submit</h2>
+      <p class="section-subtitle">Please verify all details before submitting. Once submitted, data will be saved to
+        Excel.</p>
+
+      <div class="review-section" id="review-personal">
+        <h3>👤 Personal Information</h3>
+        <div class="review-grid" id="review-personal-grid"></div>
+      </div>
+
+      <div class="review-section" id="review-contact">
+        <h3>📞 Contact & Family</h3>
+        <div class="review-grid" id="review-contact-grid"></div>
+      </div>
+
+      <div class="review-section" id="review-academic">
+        <h3>🎓 Academic Records</h3>
+        <div class="review-grid" id="review-academic-grid"></div>
+      </div>
+
+      <div class="review-section">
+        <h3>📄 Documents Submitted</h3>
+        <div id="review-docs" style="font-size:13px; line-height:2;"></div>
+      </div>
+
+      <div class="info-card" style="background:#fff8e1; border-color:var(--gold);">
+        <strong>⚠️ Declaration</strong>
+        I hereby declare that all the information furnished above is true and correct to the best of my knowledge. I
+        understand that any false information may lead to cancellation of admission.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="prevPage(5)">← Back</button>
+        <div style="display:flex;gap:12px">
+          <button class="btn btn-gold" onclick="downloadExcel()">📊 Download Excel Record</button>
+          <button class="btn btn-green" onclick="printForm()">🖨️ Print Form</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PRINT AREA (hidden until print) -->
+  <div id="print-area" style="display:none"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ─── STATE ─── */
+    let currentPage = 1;
+    const totalPages = 5;
+    const stepLabels = [
+      'Step 1 of 5: Personal Information',
+      'Step 2 of 5: Contact & Family',
+      'Step 3 of 5: Academic Career',
+      'Step 4 of 5: Documents Checklist',
+      'Step 5 of 5: Review & Submit'
+    ];
+
+    /* ─── NAVIGATION ─── */
+    function showPage(n) {
+      document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + n).classList.add('active');
+      document.querySelectorAll('.step-dot').forEach((d, i) => {
+        d.classList.remove('active', 'done');
+        if (i + 1 < n) d.classList.add('done');
+        if (i + 1 === n) d.classList.add('active');
+      });
+      document.getElementById('progress-fill').style.width = (n / totalPages * 100) + '%';
+      document.getElementById('step-label').textContent = stepLabels[n - 1];
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextPage(from) {
+      if (!validatePage(from)) return;
+      if (from === 4) buildReview();
+      currentPage = from + 1;
+      showPage(currentPage);
+    }
+
+    function prevPage(from) {
+      currentPage = from - 1;
+      showPage(currentPage);
+    }
+
+    function goToPage(idx) {
+      if (idx + 1 <= currentPage) showPage(idx + 1);
+    }
+
+    /* ─── VALIDATION ─── */
+    function validatePage(page) {
+      const rules = {
+        1: ['branch', 'appliedUnder', 'candidateName', 'gender', 'dob', 'nationality', 'category', 'aadharNo'],
+        2: ['state', 'district', 'studentMobile', 'studentEmail', 'fatherName', 'motherName', 'mailingAddress', 'permanentAddress', 'aadharName'],
+        3: [],
+        4: [],
+      };
+      const required = rules[page] || [];
+      let valid = true;
+      required.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (!el.value.trim()) {
+          el.classList.add('error');
+          valid = false;
+        } else {
+          el.classList.remove('error');
+        }
+      });
+      // Extra validations
+      if (page === 1) {
+        const aadhar = document.getElementById('aadharNo');
+        if (aadhar.value.length !== 12) {
+          aadhar.classList.add('error');
+          showToast('Aadhar number must be exactly 12 digits', 'error');
+          return false;
+        }
+      }
+      if (page === 2) {
+        const mob = document.getElementById('studentMobile');
+        if (mob.value.length !== 10) {
+          mob.classList.add('error');
+          showToast('Student mobile must be 10 digits', 'error');
+          return false;
+        }
+        const email = document.getElementById('studentEmail');
+        if (!email.value.includes('@')) {
+          email.classList.add('error');
+          showToast('Please enter a valid email', 'error');
+          return false;
+        }
+      }
+      if (!valid) showToast('Please fill all required fields (*)', 'error');
+      return valid;
+    }
+
+    /* ─── LETTER BOX PREVIEW ─── */
+    function updateBoxes(inputId, previewId, maxLen) {
+      const val = document.getElementById(inputId).value.toUpperCase();
+      const preview = document.getElementById(previewId);
+      if (!preview) return;
+      preview.innerHTML = '';
+      for (let i = 0; i < maxLen; i++) {
+        const box = document.createElement('div');
+        box.className = 'lbox';
+        box.textContent = val[i] || '';
+        preview.appendChild(box);
+      }
+    }
+
+    /* ─── MARKS CALCULATION ─── */
+    function calcPct(prefix) {
+      const max = parseFloat(document.getElementById(prefix + '_maxMarks')?.value) || 0;
+      const obt = parseFloat(document.getElementById(prefix + '_marksObtained')?.value) || 0;
+      const pctEl = document.getElementById(prefix + '_pct');
+      if (pctEl && max > 0) pctEl.value = ((obt / max) * 100).toFixed(2) + '%';
+    }
+
+    const subjects = ['math', 'phy', 'chem', 'elec', 'cs', 'bio'];
+    function calcSubPct(subj) {
+      const max = parseFloat(document.getElementById(subj + '_max')?.value) || 0;
+      const obt = parseFloat(document.getElementById(subj + '_obt')?.value) || 0;
+      const pct = document.getElementById(subj + '_pct');
+      if (pct && max > 0) pct.value = ((obt / max) * 100).toFixed(2) + '%';
+      // update totals
+      let totalMax = 0, totalObt = 0;
+      subjects.forEach(s => {
+        totalMax += parseFloat(document.getElementById(s + '_max')?.value) || 0;
+        totalObt += parseFloat(document.getElementById(s + '_obt')?.value) || 0;
+      });
+      document.getElementById('total_max').value = totalMax || '';
+      document.getElementById('total_obt').value = totalObt || '';
+      document.getElementById('total_pct').value = totalMax > 0 ? ((totalObt / totalMax) * 100).toFixed(2) + '%' : '';
+    }
+
+    /* ─── GATHER ALL DATA ─── */
+    function gatherData() {
+      const g = id => (document.getElementById(id)?.value || '').trim();
+      const docs = [];
+      const docNames = [
+        'Marks card of Qualifying Examinations', 'SSLC Marks Card', 'Transfer Certificate',
+        'Migration Certificate', 'Character Certificate', 'Caste Certificate', 'Study Certificate',
+        'Medical Fitness Certificate', 'CET Admission Order', 'Recent Photographs',
+        'Eligibility Certificate (Other State/Foreign)'
+      ];
+      for (let i = 1; i <= 11; i++) {
+        if (document.getElementById('doc' + i)?.checked) docs.push(docNames[i - 1]);
+      }
+      return {
+        branch: g('branch'), semester: g('semester'), appliedUnder: g('appliedUnder'),
+        rank: g('rank'), admissionDate: g('admissionDate'),
+        candidateName: g('candidateName'), gender: g('gender'), dob: g('dob'),
+        motherTongue: g('motherTongue'), religion: g('religion'),
+        nationality: g('nationality'), category: g('category'), caste: g('caste'),
+        obc: g('obc'), cetNo: g('cetNo'), seatClaimed: g('seatClaimed'),
+        seatAllotted: g('seatAllotted'), physicallyHandicapped: g('physicallyHandicapped'),
+        economicallyBackward: g('economicallyBackward'), residentType: g('residentType'),
+        bloodGroup: g('bloodGroup'), aadharNo: g('aadharNo'), feesPaid: g('feesPaid'),
+        state: g('state'), district: g('district'), annualIncome: g('annualIncome'),
+        studentMobile: g('studentMobile'), studentEmail: g('studentEmail'),
+        fatherName: g('fatherName'), fatherOccupation: g('fatherOccupation'), fatherMobile: g('fatherMobile'),
+        motherName: g('motherName'), motherOccupation: g('motherOccupation'), motherMobile: g('motherMobile'),
+        mailingAddress: g('mailingAddress'), mailingPin: g('mailingPin'),
+        permanentAddress: g('permanentAddress'), permanentPin: g('permanentPin'),
+        aadharName: g('aadharName'),
+        guardianInfo: g('guardianInfo'), guardianMobile: g('guardianMobile'), guardianPin: g('guardianPin'),
+        sslc_school: g('sslc_school'), sslc_board: g('sslc_board'), sslc_state: g('sslc_state'),
+        sslc_regNo: g('sslc_regNo'), sslc_maxMarks: g('sslc_maxMarks'),
+        sslc_marksObtained: g('sslc_marksObtained'), sslc_pct: g('sslc_pct'), sslc_passingDate: g('sslc_passingDate'),
+        puc_school: g('puc_school'), puc_board: g('puc_board'), puc_state: g('puc_state'),
+        puc_regNo: g('puc_regNo'), puc_maxMarks: g('puc_maxMarks'),
+        puc_marksObtained: g('puc_marksObtained'), puc_pct: g('puc_pct'), puc_passingDate: g('puc_passingDate'),
+        math_max: g('math_max'), math_obt: g('math_obt'), math_pct: g('math_pct'),
+        phy_max: g('phy_max'), phy_obt: g('phy_obt'), phy_pct: g('phy_pct'),
+        chem_max: g('chem_max'), chem_obt: g('chem_obt'), chem_pct: g('chem_pct'),
+        elec_max: g('elec_max'), elec_obt: g('elec_obt'), elec_pct: g('elec_pct'),
+        cs_max: g('cs_max'), cs_obt: g('cs_obt'), cs_pct: g('cs_pct'),
+        bio_max: g('bio_max'), bio_obt: g('bio_obt'), bio_pct: g('bio_pct'),
+        total_max: g('total_max'), total_obt: g('total_obt'), total_pct: g('total_pct'),
+        dip_school: g('dip_school'), dip_board: g('dip_board'), dip_state: g('dip_state'),
+        dip_regNo: g('dip_regNo'), dip_maxMarks: g('dip_maxMarks'),
+        dip_marksObtained: g('dip_marksObtained'), dip_pct: g('dip_pct'), dip_passingDate: g('dip_passingDate'),
+        documentsSubmitted: docs.join('; '),
+        submissionTimestamp: new Date().toLocaleString('en-IN')
+      };
+    }
+
+    /* ─── REVIEW BUILDER ─── */
+    function buildReview() {
+      const d = gatherData();
+
+      function ri(label, val, boxes) {
+        const valHtml = boxes
+          ? `<div class="review-value boxes">${[...val.padEnd(30, ' ')].map(c => `<span>${c.trim()}</span>`).join('')}</div>`
+          : `<div class="review-value">${val || '<em style="color:#aaa">Not provided</em>'}</div>`;
+        return `<div class="review-item"><div class="review-label">${label}</div>${valHtml}</div>`;
+      }
+
+      document.getElementById('review-personal-grid').innerHTML =
+        ri('Branch', d.branch) + ri('Semester', d.semester) +
+        ri('Applied Under', d.appliedUnder) + ri('Rank', d.rank) +
+        ri('Candidate Name', d.candidateName, true) +
+        ri('Gender', d.gender) + ri('DOB', d.dob) + ri('Blood Group', d.bloodGroup) +
+        ri('Category', d.category) + ri('Caste', d.caste) +
+        ri('Aadhar No.', d.aadharNo) + ri('Fees Paid', d.feesPaid ? '₹' + d.feesPaid : '');
+
+      document.getElementById('review-contact-grid').innerHTML =
+        ri('Father Name', d.fatherName, true) + ri('Mother Name', d.motherName, true) +
+        ri('Student Mobile', d.studentMobile) + ri('Student Email', d.studentEmail) +
+        ri('State', d.state) + ri('District', d.district) +
+        ri('Mailing Pin', d.mailingPin) + ri('Permanent Pin', d.permanentPin);
+
+      document.getElementById('review-academic-grid').innerHTML =
+        ri('10th School', d.sslc_school) + ri('10th Board', d.sslc_board) +
+        ri('10th Register No.', d.sslc_regNo) + ri('10th %', d.sslc_pct) +
+        ri('12th College', d.puc_school) + ri('12th Board', d.puc_board) +
+        ri('12th Register No.', d.puc_regNo) + ri('12th %', d.puc_pct) +
+        ri('Maths', `${d.math_obt}/${d.math_max} (${d.math_pct})`) +
+        ri('Physics', `${d.phy_obt}/${d.phy_max} (${d.phy_pct})`) +
+        ri('Chemistry', `${d.chem_obt}/${d.chem_max} (${d.chem_pct})`) +
+        ri('Grand Total', `${d.total_obt}/${d.total_max} (${d.total_pct})`);
+
+      const docList = d.documentsSubmitted ? d.documentsSubmitted.split('; ').map(doc =>
+        `<span style="display:inline-block;background:var(--green);color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;margin:3px">${doc}</span>`
+      ).join('') : '<em>No documents selected</em>';
+      document.getElementById('review-docs').innerHTML = docList;
+    }
+
+    /* ─── EXCEL DOWNLOAD ─── */
+    function downloadExcel() {
+      const d = gatherData();
+      const headers = Object.keys(d).map(k => k.replace(/([A-Z])/g, ' $1').trim().replace(/^./, s => s.toUpperCase()));
+      const values = Object.values(d);
+      const ws = XLSX.utils.aoa_to_sheet([headers, values]);
+
+      // Style header row
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+        if (cell) {
+          cell.s = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '0F1F3D' } } };
+        }
+      }
+
+      ws['!cols'] = headers.map(() => ({ wch: 22 }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Admission Records');
+
+      const fname = `SSIT_Admission_${d.candidateName.replace(/\s/g, '_')}_${Date.now()}.xlsx`;
+      XLSX.writeFile(wb, fname);
+      showToast('✅ Excel record downloaded successfully!');
+    }
+
+    /* ─── PRINT FORM ─── */
+    function printForm() {
+      const d = gatherData();
+
+      function boxes(str, n) {
+        const s = (str || '').toUpperCase().padEnd(n, ' ');
+        return [...s].slice(0, n).map(c => `<div class="print-box">${c.trim()}</div>`).join('');
+      }
+
+      const html = `
+  <html><head>
+  <title>SSIT Admission Form – ${d.candidateName}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; font-size: 9pt; padding: 15mm; background: white; }
+    .header { text-align: center; margin-bottom: 12pt; }
+    .header h1 { font-size: 13pt; font-weight: 700; }
+    .header h2 { font-size: 10pt; font-weight: 400; margin-top: 4pt; }
+    .form-title { font-size: 14pt; font-weight: 700; text-align: center; margin: 10pt 0; text-decoration: underline; }
+    .row { display: flex; align-items: flex-start; margin-bottom: 6pt; gap: 6pt; flex-wrap: wrap; }
+    .lbl { font-size: 8pt; min-width: 90pt; color: #333; padding-top: 2pt; }
+    .boxes { display: flex; gap: 1pt; flex-wrap: wrap; }
+    .box { width: 14pt; height: 16pt; border: 1pt solid #666; display: flex; align-items: center; justify-content: center; font-family: 'Courier Prime', monospace; font-size: 10pt; font-weight: 700; }
+    .val { border-bottom: 1pt solid #999; min-width: 120pt; font-size: 9pt; padding-bottom: 1pt; }
+    .section { margin-top: 8pt; margin-bottom: 4pt; font-weight: 700; font-size: 9pt; border-bottom: 1pt solid #333; padding-bottom: 2pt; }
+    table { width: 100%; border-collapse: collapse; font-size: 8pt; margin-bottom: 8pt; }
+    th { background: #0f1f3d; color: white; padding: 4pt 6pt; text-align: left; font-size: 7.5pt; }
+    td { border: 0.5pt solid #aaa; padding: 3pt 5pt; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8pt; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+    .field-inline { display: flex; flex-direction: column; }
+    .field-inline .lbl { min-width: auto; font-size: 7.5pt; color: #666; }
+    .field-inline .val { min-width: auto; }
+    .sig-section { display: flex; justify-content: space-between; margin-top: 20pt; }
+    .sig-box { text-align: center; }
+    .sig-line { border-bottom: 1pt solid #333; width: 150pt; margin: 25pt auto 3pt; }
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 3pt; }
+    .check-row { display: flex; align-items: center; gap: 4pt; font-size: 8pt; }
+    .cb { width: 10pt; height: 10pt; border: 1pt solid #666; display: inline-block; text-align: center; line-height: 10pt; font-size: 8pt; }
+    @media print { @page { margin: 10mm; } }
+  </style></head><body>
+  <div class="header">
+    <h1>SRI SIDDHARTHA INSTITUTE OF TECHNOLOGY, TUMAKURU</h1>
+    <h2>(Approved by AICTE, Accredited by NBA, New Delhi) (A Constituent College of Sri Siddhartha Academy of Higher Education, Accredited 'A' Grade by NAAC New Delhi)</h2>
+    <h2>Phone: 0816-2201073, 2200314, Fax: 0816-2200999</h2>
+  </div>
+  <div class="form-title">Application for Admission to Bachelor of Engineering Degree</div>
+
+  <div class="row">
+    <span class="lbl">Branch</span><span class="val">${d.branch}</span>
+    <span class="lbl" style="margin-left:16pt">No:</span><span class="val">2800</span>
+  </div>
+  <div class="row">
+    <span class="lbl">Semester</span><span class="val">${d.semester}</span>
+    <span class="lbl">Applied Under</span><span class="val">${d.appliedUnder}</span>
+    <span class="lbl">Rank</span><span class="val">${d.rank}</span>
+    <span class="lbl">Admission Date</span><span class="val">${d.admissionDate}</span>
+  </div>
+
+  <div class="row" style="margin-top:8pt">
+    <span class="lbl">Candidate Name<br><small>(10th Marks Card)</small></span>
+    <div class="boxes">${boxes(d.candidateName, 30)}</div>
+  </div>
+
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Gender</div><div class="val">${d.gender}</div></div>
+    <div class="field-inline"><div class="lbl">DOB</div><div class="val">${d.dob}</div></div>
+    <div class="field-inline"><div class="lbl">Mother Tongue</div><div class="val">${d.motherTongue}</div></div>
+  </div>
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Religion</div><div class="val">${d.religion}</div></div>
+    <div class="field-inline"><div class="lbl">Nationality</div><div class="val">${d.nationality}</div></div>
+    <div class="field-inline"><div class="lbl">Blood Group</div><div class="val">${d.bloodGroup}</div></div>
+  </div>
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Category</div><div class="val">${d.category}</div></div>
+    <div class="field-inline"><div class="lbl">Caste</div><div class="val">${d.caste}</div></div>
+    <div class="field-inline"><div class="lbl">OBC</div><div class="val">${d.obc}</div></div>
+  </div>
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">CET No.</div><div class="val">${d.cetNo}</div></div>
+    <div class="field-inline"><div class="lbl">Seat Claimed Category</div><div class="val">${d.seatClaimed}</div></div>
+    <div class="field-inline"><div class="lbl">Seat Allotted Category</div><div class="val">${d.seatAllotted}</div></div>
+  </div>
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Physically Handicapped</div><div class="val">${d.physicallyHandicapped}</div></div>
+    <div class="field-inline"><div class="lbl">Economically Backward</div><div class="val">${d.economicallyBackward}</div></div>
+    <div class="field-inline"><div class="lbl">Resident Type</div><div class="val">${d.residentType}</div></div>
+  </div>
+  <div class="row-2" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Aadhar No.</div><div class="val">${d.aadharNo}</div></div>
+    <div class="field-inline"><div class="lbl">Fees Paid</div><div class="val">₹${d.feesPaid || ''}</div></div>
+  </div>
+  <div class="row-3" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">State</div><div class="val">${d.state}</div></div>
+    <div class="field-inline"><div class="lbl">District</div><div class="val">${d.district}</div></div>
+    <div class="field-inline"><div class="lbl">Annual Income</div><div class="val">₹${d.annualIncome || ''}</div></div>
+  </div>
+  <div class="row-2" style="margin-top:6pt">
+    <div class="field-inline"><div class="lbl">Mobile No. (Student)</div><div class="val">${d.studentMobile}</div></div>
+    <div class="field-inline"><div class="lbl">E-mail (Student)</div><div class="val">${d.studentEmail}</div></div>
+  </div>
+
+  <div class="row" style="margin-top:8pt">
+    <span class="lbl">Father Name</span>
+    <div class="boxes">${boxes(d.fatherName, 30)}</div>
+  </div>
+  <div class="row-2" style="margin-top:4pt">
+    <div class="field-inline"><div class="lbl">Occupation</div><div class="val">${d.fatherOccupation}</div></div>
+    <div class="field-inline"><div class="lbl">Mobile Number</div><div class="val">${d.fatherMobile}</div></div>
+  </div>
+  <div class="row" style="margin-top:8pt">
+    <span class="lbl">Mother Name</span>
+    <div class="boxes">${boxes(d.motherName, 30)}</div>
+  </div>
+  <div class="row-2" style="margin-top:4pt">
+    <div class="field-inline"><div class="lbl">Occupation</div><div class="val">${d.motherOccupation}</div></div>
+    <div class="field-inline"><div class="lbl">Mobile Number</div><div class="val">${d.motherMobile}</div></div>
+  </div>
+
+  <div class="row-2" style="margin-top:8pt">
+    <div class="field-inline">
+      <div class="lbl">Mailing Address</div>
+      <div class="val" style="min-height:40pt">${d.mailingAddress}</div>
+      <div style="margin-top:4pt"><span class="lbl">PIN: </span><span class="val">${d.mailingPin}</span></div>
+    </div>
+    <div class="field-inline">
+      <div class="lbl">Permanent Address</div>
+      <div class="val" style="min-height:40pt">${d.permanentAddress}</div>
+      <div style="margin-top:4pt"><span class="lbl">PIN: </span><span class="val">${d.permanentPin}</span></div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:8pt">
+    <span class="lbl">Candidate Name<br><small>(As in Aadhar)</small></span>
+    <div class="boxes">${boxes(d.aadharName, 30)}</div>
+  </div>
+  <div style="margin-top:6pt">
+    <div class="lbl">Guardian Name & Address</div>
+    <div class="val" style="min-height:30pt">${d.guardianInfo}</div>
+    <div class="row-2" style="margin-top:4pt">
+      <div class="field-inline"><div class="lbl">Mobile</div><div class="val">${d.guardianMobile}</div></div>
+      <div class="field-inline"><div class="lbl">PIN Code</div><div class="val">${d.guardianPin}</div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div style="page-break-before:always"></div>
+  <div class="section">Academic Career</div>
+  <table>
+    <tr>
+      <th>Exam</th><th>School/College</th><th>Board/Univ.</th>
+      <th>State</th><th>Reg. No.</th><th>Max Marks</th><th>Obtained</th><th>%</th><th>Month & Year</th>
+    </tr>
+    <tr>
+      <td><strong>10th Std.</strong></td>
+      <td>${d.sslc_school}</td><td>${d.sslc_board}</td><td>${d.sslc_state}</td>
+      <td>${d.sslc_regNo}</td><td>${d.sslc_maxMarks}</td><td>${d.sslc_marksObtained}</td>
+      <td>${d.sslc_pct}</td><td>${d.sslc_passingDate}</td>
+    </tr>
+    <tr>
+      <td><strong>12th Std.</strong></td>
+      <td>${d.puc_school}</td><td>${d.puc_board}</td><td>${d.puc_state}</td>
+      <td>${d.puc_regNo}</td><td>${d.puc_maxMarks}</td><td>${d.puc_marksObtained}</td>
+      <td>${d.puc_pct}</td><td>${d.puc_passingDate}</td>
+    </tr>
+    <tr>
+      <td><strong>Diploma/B.Sc</strong></td>
+      <td>${d.dip_school}</td><td>${d.dip_board}</td><td>${d.dip_state}</td>
+      <td>${d.dip_regNo}</td><td>${d.dip_maxMarks}</td><td>${d.dip_marksObtained}</td>
+      <td>${d.dip_pct}</td><td>${d.dip_passingDate}</td>
+    </tr>
+  </table>
+
+  <div class="section">Examination Marks Obtained in the Qualifying Examination (12th Std.)</div>
+  <table style="width:55%;display:inline-table;vertical-align:top">
+    <tr><th>Subject</th><th>Max</th><th>Obtained</th><th>%</th></tr>
+    <tr><td>Mathematics</td><td>${d.math_max}</td><td>${d.math_obt}</td><td>${d.math_pct}</td></tr>
+    <tr><td>Physics</td><td>${d.phy_max}</td><td>${d.phy_obt}</td><td>${d.phy_pct}</td></tr>
+    <tr><td>Chemistry</td><td>${d.chem_max}</td><td>${d.chem_obt}</td><td>${d.chem_pct}</td></tr>
+    <tr><td>Electronics</td><td>${d.elec_max}</td><td>${d.elec_obt}</td><td>${d.elec_pct}</td></tr>
+    <tr><td>Computer Science</td><td>${d.cs_max}</td><td>${d.cs_obt}</td><td>${d.cs_pct}</td></tr>
+    <tr><td>Biology/Bio-Tech</td><td>${d.bio_max}</td><td>${d.bio_obt}</td><td>${d.bio_pct}</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>${d.total_max}</strong></td><td><strong>${d.total_obt}</strong></td><td><strong>${d.total_pct}</strong></td></tr>
+  </table>
+
+  <div class="section" style="margin-top:12pt">Documents to be Enclosed</div>
+  <div class="checklist">
+    ${[
+          'Marks card of Qualifying Examinations', 'SSLC Marks Card', 'Transfer Certificate',
+          'Migration Certificate', 'Character Certificate', 'Caste Certificate', 'Study Certificate',
+          'Medical Fitness Certificate', 'CET Admission Order', 'Recent Photographs',
+          'Eligibility certificate and other documents (Other states/Foreign students as required by SSAHE)'
+        ].map((doc, i) => {
+          const checked = d.documentsSubmitted.includes(doc.substring(0, 15)) ? '✓' : '';
+          return `<div class="check-row"><div class="cb">${checked}</div> ${i + 1}. ${doc}</div>`;
+        }).join('')}
+  </div>
+
+  <div class="sig-section">
+    <div class="sig-box">
+      <div class="sig-line"></div>
+      <div>Signature of Parent / Guardian</div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-line"></div>
+      <div>Signature of Student</div>
+    </div>
+  </div>
+
+  <script>window.onload = function() { window.print(); }<\/script>
+  </body></html>`;
+
+      const win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
+    }
+
+    /* ─── TOAST ─── */
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = type === 'error' ? '#c0392b' : '#1a7a4a';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // Initialize box previews
+    updateBoxes('candidateName', 'preview-name', 30);
+  </script>
+</body>
+
+</html>
